@@ -90,6 +90,14 @@ CREATE TRIGGER update_item_references
   FOR EACH ROW EXECUTE PROCEDURE update_item_references();
 GRANT ALL ON myuniversity_mymodule.item TO myuniversity_mymodule;
 
+CREATE INDEX idxgin_item_title ON myuniversity_mymodule.item ((jsonb->>'title'));
+
+CREATE INDEX idxgin_mt_id      ON myuniversity_mymodule.material_type ((jsonb->>'id'));
+
+CREATE INDEX idxgin_item_id    ON myuniversity_mymodule.item ((jsonb->>'id'));
+
+CREATE INDEX idxgin_item_mt    ON myuniversity_mymodule.item ((jsonb->>'materialTypeId'));
+
 CREATE TABLE myuniversity_mymodule.instance (
   _id UUID PRIMARY KEY,
   jsonb JSONB NOT NULL
