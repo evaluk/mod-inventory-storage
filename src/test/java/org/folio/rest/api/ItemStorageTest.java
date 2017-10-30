@@ -1,15 +1,16 @@
 package org.folio.rest.api;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.folio.rest.support.*;
-import org.folio.rest.support.client.LoanTypesClient;
-import org.folio.rest.support.client.MaterialTypesClient;
-import org.folio.rest.support.client.ShelfLocationsClient;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.folio.rest.api.StorageTestSuite.itemsUrl;
+import static org.folio.rest.api.StorageTestSuite.loanTypesUrl;
+import static org.folio.rest.api.StorageTestSuite.materialTypesUrl;
+import static org.folio.rest.api.StorageTestSuite.shelfLocationsUrl;
+import static org.folio.rest.support.JsonObjectMatchers.hasSoleMessgeContaining;
+import static org.folio.rest.support.JsonObjectMatchers.validationErrorMatches;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -23,12 +24,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.folio.rest.api.StorageTestSuite.*;
-import static org.folio.rest.support.JsonObjectMatchers.hasSoleMessgeContaining;
-import static org.folio.rest.support.JsonObjectMatchers.validationErrorMatches;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertThat;
+import org.folio.rest.support.AdditionalHttpStatusCodes;
+import org.folio.rest.support.JsonArrayHelper;
+import org.folio.rest.support.JsonErrorResponse;
+import org.folio.rest.support.JsonResponse;
+import org.folio.rest.support.Response;
+import org.folio.rest.support.ResponseHandler;
+import org.folio.rest.support.TextResponse;
+import org.folio.rest.support.client.LoanTypesClient;
+import org.folio.rest.support.client.MaterialTypesClient;
+import org.folio.rest.support.client.ShelfLocationsClient;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 public class ItemStorageTest extends TestBase {
 
@@ -636,7 +648,7 @@ public class ItemStorageTest extends TestBase {
     JsonArray secondPageItems = secondPage.getJsonArray("items");
 
     assertThat(firstPageItems.size(), is(3));
-    assertThat(firstPage.getInteger("totalRecords"), is(5));
+    assertThat(firstPage.getInteger("totalRecords"), is(6));
 
     assertThat(secondPageItems.size(), is(2));
     assertThat(secondPage.getInteger("totalRecords"), is(5));
