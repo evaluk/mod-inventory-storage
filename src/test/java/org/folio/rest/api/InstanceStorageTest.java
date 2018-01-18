@@ -2,10 +2,7 @@ package org.folio.rest.api;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.folio.rest.support.AdditionalHttpStatusCodes;
-import org.folio.rest.support.JsonErrorResponse;
-import org.folio.rest.support.Response;
-import org.folio.rest.support.ResponseHandler;
+import org.folio.rest.support.*;
 import org.folio.rest.support.builders.HoldingRequestBuilder;
 import org.folio.rest.support.builders.ItemRequestBuilder;
 import org.folio.rest.support.client.LoanTypesClient;
@@ -21,6 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -529,6 +527,62 @@ public class InstanceStorageTest extends TestBase {
   @Test
   public void canSearchForInstancesUsingSimilarQueryToUILookAheadSearch() {
     canSort("title=\"up*\" or contributors=\"name\": \"up*\" or identifiers=\"value\": \"up*\"", "Uprooted");
+  }
+
+  @Test
+  public void searchIncludesDistinctInstances()
+    throws InterruptedException,
+    MalformedURLException,
+    TimeoutException,
+    ExecutionException {
+
+    UUID instanceId = UUID.randomUUID();
+    UUID holdingId = UUID.randomUUID();
+
+    createInstance(smallAngryPlanet(instanceId));
+
+    createHoldings(new HoldingRequestBuilder()
+      .withId(holdingId)
+      .withPermanentLocation(mainLibraryLocationId)
+      .forInstance(instanceId)
+      .create());
+
+    createItem(new ItemRequestBuilder()
+      .forHolding(holdingId)
+      .withBarcode("706949453641")
+      .withPermanentLoanType(canCirculateLoanTypeId)
+      .withMaterialType(bookMaterialTypeId)
+      .create());
+
+    createItem(new ItemRequestBuilder()
+      .forHolding(holdingId)
+      .withBarcode("706949453642")
+      .withPermanentLoanType(canCirculateLoanTypeId)
+      .withMaterialType(bookMaterialTypeId)
+      .create());
+
+    createItem(new ItemRequestBuilder()
+      .forHolding(holdingId)
+      .withBarcode("706949453643")
+      .withPermanentLoanType(canCirculateLoanTypeId)
+      .withMaterialType(bookMaterialTypeId)
+      .create());
+
+    JsonObject searchBody = searchForInstances("item.barcode=70694945364*");
+
+    assertThat("Total records should be 3",
+      searchBody.getInteger("totalRecords"), is(3));
+
+    List<JsonObject> foundInstances = JsonArrayHelper.toList(searchBody.getJsonArray("instances"));
+
+    assertThat("Instances in page should be 1", foundInstances.size(), is(1));
+
+    int distinctCount = Math.toIntExact(foundInstances.stream()
+      .map(instance -> instance.getString("id"))
+      .distinct()
+      .count());
+
+    assertThat("Distinct instances should be 1", distinctCount, is(1));
   }
 
   @Test
