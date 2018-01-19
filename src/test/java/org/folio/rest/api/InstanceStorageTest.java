@@ -568,7 +568,7 @@ public class InstanceStorageTest extends TestBase {
       .withMaterialType(bookMaterialTypeId)
       .create());
 
-    JsonObject searchBody = searchForInstances("item.barcode=70694945364*");
+    JsonObject searchBody = searchForInstances("item.barcode=70694945364* sortBy title");
 
     assertThat("Total records should be 3",
       searchBody.getInteger("totalRecords"), is(3));
