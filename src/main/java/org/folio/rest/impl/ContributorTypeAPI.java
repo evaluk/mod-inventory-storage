@@ -23,6 +23,7 @@ import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 
 import javax.ws.rs.core.Response;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,11 +32,11 @@ import java.util.UUID;
  * Implements the instance contributor type persistency using postgres jsonb.
  */
 public class ContributorTypeAPI implements ContributorTypesResource {
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   public static final String CONTRIBUTOR_TYPE_TABLE   = "contributor_type";
 
   private static final String LOCATION_PREFIX       = "/contributor-types/";
-  private static final Logger log                 = LoggerFactory.getLogger(ContributorTypeAPI.class);
   private final Messages messages                 = Messages.getInstance();
   private String idFieldName                      = "_id";
 
@@ -59,10 +60,17 @@ public class ContributorTypeAPI implements ContributorTypesResource {
      */
     vertxContext.runOnContext(v -> {
       try {
-        String tenantId = TenantTool.tenantId(okapiHeaders);
+        PostgresClient postgresClient = PostgresClient.getInstance(
+          vertxContext.owner(), TenantTool.tenantId(okapiHeaders));
+
+        String[] fieldList = {"*"};
+
         CQLWrapper cql = getCQL(query, limit, offset);
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(CONTRIBUTOR_TYPE_TABLE, ContributorType.class,
-            new String[]{"*"}, cql, true, true,
+
+        log.info(String.format("SQL generated from CQL: %s", cql.toString()));
+
+        postgresClient.get(CONTRIBUTOR_TYPE_TABLE, ContributorType.class,
+            fieldList, cql, true, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
