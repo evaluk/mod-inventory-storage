@@ -78,4 +78,10 @@ public class InterfaceUrls {
     throws MalformedURLException {
     return StorageTestSuite.storageUrl("/location-units/libraries" + subPath);
   }
+
+  public static URL contributorTypesUrl(String subPath)
+    throws MalformedURLException {
+
+    return StorageTestSuite.storageUrl("/contributor-types" + subPath);
+  }
 }

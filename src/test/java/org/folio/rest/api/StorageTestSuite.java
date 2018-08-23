@@ -39,10 +39,12 @@ import static org.junit.Assert.assertThat;
   LocationUnitTest.class,
   LocationsTest.class,
   ServicePointTest.class,
-  ServicePointsUserTest.class
+  ServicePointsUserTest.class,
+  ContributorTypesTest.class
 })
-@SuppressWarnings("squid:S1118")  // suppress "Utility classes should not have public constructors"
 public class StorageTestSuite {
+  private StorageTestSuite() { }
+
   public static final String TENANT_ID = "test_tenant";
 
   private static Vertx vertx;
