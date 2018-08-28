@@ -308,17 +308,17 @@ public class ItemStorageAPI implements ItemStorageResource {
       PostgresClient postgresClient = PostgresClient.getInstance(
         vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
-      String[] fieldList = {"*"};
+      Criteria criteria = new Criteria()
+        .addField("_id")
+        .setJSONB(false)
+        .setOperation("=")
+        .setValue("'" + itemId + "'");
 
-      String query = String.format("id==%s", itemId);
-
-      CQLWrapper cql = getCQL(query, 1, 0);
-
-      log.info(String.format("SQL generated from CQL: %s", cql.toString()));
+      Criterion criterion = new Criterion().addCriterion(criteria);
 
       vertxContext.runOnContext(v -> {
         try {
-          postgresClient.get(getTableName(query), Item.class, fieldList, cql, true, false,
+          postgresClient.get(ITEM_TABLE, Item.class, criterion, false,
             reply -> {
               try {
                 if(reply.succeeded()) {
@@ -433,15 +433,15 @@ public class ItemStorageAPI implements ItemStorageResource {
               }
               else {
                 try {
-                  String[] fieldList = {"*"};
+                  Criteria criteria = new Criteria()
+                    .addField("_id")
+                    .setJSONB(false)
+                    .setOperation("=")
+                    .setValue("'" + itemId + "'");
 
-                  String query = String.format("id==%s", itemId);
+                  Criterion criterion = new Criterion().addCriterion(criteria);
 
-                  CQLWrapper cql = getCQL(query, 1, 0);
-
-                  log.info(String.format("SQL generated from CQL: %s", cql.toString()));
-
-                  postgresClient.get(getTableName(query), Item.class, fieldList, cql, true, false,
+                  postgresClient.get(ITEM_TABLE, Item.class, criterion, false,
                     reply -> {
                       if(reply.succeeded()) {
                         List<Item> itemList = (List<Item>) reply.result().getResults();
